@@ -1,137 +1,112 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Catatan Penjualan</title>
-    <style>
-        body {
-            font-family: Arial;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-
-        input,
-        button {
-            padding: 8px;
-            margin: 5px;
-        }
-
-        button {
-            background: blue;
-            color: white;
-            border: none;
-        }
-
-        table {
-            margin-top: 20px;
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background: blue;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Penjualan Online</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    input, button { padding: 8px; margin: 5px; }
+    button { background: blue; color: white; border: none; cursor: pointer; }
+    table { margin-top: 20px; width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: blue; color: white; }
+  </style>
 </head>
-
 <body>
 
-    <h2>📊 Catatan Penjualan</h2>
+<h2>📊 Sistem Penjualan Online</h2>
 
-    <input type="text" id="nama" placeholder="Nama"><br>
-    <input type="text" id="produk" placeholder="Produk"><br>
-    <input type="number" id="harga" placeholder="Harga"><br>
+<input type="text" id="nama" placeholder="Nama"><br>
+<input type="text" id="produk" placeholder="Produk"><br>
+<input type="number" id="harga" placeholder="Harga"><br>
 
-    <button onclick="tambahData()">Simpan</button>
+<button onclick="tambahData()">Simpan</button>
 
-    <h3>Total: Rp <span id="total">0</span></h3>
+<h3>Total: Rp <span id="total">0</span></h3>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>Produk</th>
-                <th>Harga</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="tabelData"></tbody>
-    </table>
+<table>
+<thead>
+<tr>
+<th>Nama</th>
+<th>Produk</th>
+<th>Harga</th>
+</tr>
+</thead>
+<tbody id="tabelData"></tbody>
+</table>
 
-    <script>
-        let data = [];
+<script>
+let data = [];
 
-        // 🔥 GANTI DENGAN LINK KAMU
-        const API_URL = "https://script.google.com/macros/s/AKfycbx-xnyHuMSycWKnSxRDJQlRBrwb9U9A-oNt3dllc3StKTuwGp1ORbt0sYmwNhXzeRw2mw/exec";
+// 🔥 GANTI DENGAN LINK APPS SCRIPT KAMU
+const API_URL = "https://script.google.com/macros/s/AKfycbxBDE-IyHODiaYsDmqu5dvIUWYosZ7We6EjJfS9dX6_DDu5hdSIZwBmO8WnByX3RXO9xg/exec";
 
-        function tampilkanData() {
-            let tabel = document.getElementById("tabelData");
-            tabel.innerHTML = "";
-            let total = 0;
+// ambil data dari Google Sheets
+function loadData() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(result => {
+      data = result;
+      tampilkanData();
+    })
+    .catch(err => console.log("Error load:", err));
+}
 
-            data.forEach((item, index) => {
-                total += item.harga;
+// tampilkan ke tabel
+function tampilkanData() {
+  let tabel = document.getElementById("tabelData");
+  tabel.innerHTML = "";
+  let total = 0;
 
-                tabel.innerHTML += `
+  data.forEach(item => {
+    total += parseInt(item.harga);
+
+    tabel.innerHTML += `
       <tr>
         <td>${item.nama}</td>
         <td>${item.produk}</td>
         <td>${item.harga}</td>
-        <td><button onclick="hapusData(${index})">Hapus</button></td>
       </tr>
     `;
-            });
+  });
 
-            document.getElementById("total").innerText = total;
-        }
+  document.getElementById("total").innerText = total;
+}
 
-        function tambahData() {
-            let nama = document.getElementById("nama").value;
-            let produk = document.getElementById("produk").value;
-            let harga = parseInt(document.getElementById("harga").value);
+// kirim data ke Sheets
+function tambahData() {
+  let nama = document.getElementById("nama").value;
+  let produk = document.getElementById("produk").value;
+  let harga = document.getElementById("harga").value;
 
-            if (!nama || !produk || !harga) {
-                alert("Isi semua data!");
-                return;
-            }
+  if (!nama || !produk || !harga) {
+    alert("Isi semua data!");
+    return;
+  }
 
-            // simpan ke tampilan
-            data.push({ nama, produk, harga });
-            tampilkanData();
+  fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({
+      nama: nama,
+      produk: produk,
+      harga: harga
+    })
+  });
 
-            // kirim ke Google Sheets 🔥
-            fetch(API_URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify({
-                    nama: nama,
-                    produk: produk,
-                    harga: harga
-                })
-            });
+  alert("Data terkirim!");
 
-            // reset input
-            document.getElementById("nama").value = "";
-            document.getElementById("produk").value = "";
-            document.getElementById("harga").value = "";
-        }
+  // reload data setelah kirim
+  setTimeout(loadData, 1000);
 
-        function hapusData(index) {
-            data.splice(index, 1);
-            tampilkanData();
-        }
-    </script>
+  document.getElementById("nama").value = "";
+  document.getElementById("produk").value = "";
+  document.getElementById("harga").value = "";
+}
+
+// load pertama kali
+loadData();
+</script>
 
 </body>
-
 </html>
