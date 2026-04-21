@@ -2,110 +2,444 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Penjualan Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Penjualan Online</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-    input, button { padding: 8px; margin: 5px; }
-    button { background: blue; color: white; border: none; cursor: pointer; }
-    table { margin-top: 20px; width: 100%; border-collapse: collapse; background: white; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background: blue; color: white; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #1a1a1a;
+    }
+
+    /* ── Kartu statistik ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    /* ── Form input ── */
+    .form-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .form-card h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: #374151;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus { border-color: #2563eb; }
+
+    .form-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 9px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    #statusMsg {
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    #statusMsg.success { background: #dcfce7; color: #166534; display: inline-block; }
+    #statusMsg.error   { background: #fee2e2; color: #991b1b; display: inline-block; }
+    #statusMsg.loading { background: #dbeafe; color: #1e40af; display: inline-block; }
+
+    /* ── Tabel data ── */
+    .table-card {
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-header h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    #btnRefresh {
+      background: transparent;
+      color: #2563eb;
+      border: 1px solid #2563eb;
+      padding: 5px 12px;
+      font-size: 13px;
+    }
+
+    #btnRefresh:hover { background: #eff6ff; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead tr { background: #f9fafb; }
+
+    th {
+      padding: 11px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #1a1a1a;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .harga-cell { font-weight: 500; color: #065f46; }
+
+    .btn-hapus {
+      background: transparent;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    .btn-hapus:hover { background: #fee2e2; }
+
+    .empty-row td {
+      text-align: center;
+      color: #9ca3af;
+      padding: 32px;
+      font-size: 14px;
+    }
+
+    .total-row td {
+      font-weight: 600;
+      background: #f0fdf4;
+      color: #065f46;
+    }
   </style>
 </head>
 <body>
 
-<h2>📊 Sistem Penjualan Online</h2>
+<div class="container">
+  <h1>Sistem Penjualan Online</h1>
 
-<input type="text" id="nama" placeholder="Nama"><br>
-<input type="text" id="produk" placeholder="Produk"><br>
-<input type="number" id="harga" placeholder="Harga"><br>
+  <!-- Statistik -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="label">Total Transaksi</div>
+      <div class="value" id="statTransaksi">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total Penjualan</div>
+      <div class="value" id="statTotal">Rp 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Rata-rata Harga</div>
+      <div class="value" id="statRata">Rp 0</div>
+    </div>
+  </div>
 
-<button onclick="tambahData()">Simpan</button>
+  <!-- Form tambah data -->
+  <div class="form-card">
+    <h2>Tambah Data Penjualan</h2>
+    <div class="form-grid">
+      <input type="text"   id="nama"   placeholder="Nama pembeli">
+      <input type="text"   id="produk" placeholder="Nama produk">
+    </div>
+    <div class="form-footer">
+      <input type="number" id="harga"  placeholder="Harga (contoh: 150000)" style="max-width: 260px;">
+      <button id="btnSimpan" onclick="tambahData()">Simpan Data</button>
+      <span id="statusMsg"></span>
+    </div>
+  </div>
 
-<h3>Total: Rp <span id="total">0</span></h3>
-
-<table>
-<thead>
-<tr>
-<th>Nama</th>
-<th>Produk</th>
-<th>Harga</th>
-</tr>
-</thead>
-<tbody id="tabelData"></tbody>
-</table>
+  <!-- Tabel data -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>Data Penjualan</h2>
+      <button id="btnRefresh" onclick="loadData()">Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nama</th>
+            <th>Produk</th>
+            <th>Harga</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tabelData">
+          <tr class="empty-row"><td colspan="6">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <script>
-let data = [];
+  // ============================================================
+  // GANTI INI DENGAN URL APPS SCRIPT KAMU SETELAH DEPLOY
+  // ============================================================
+  const API_URL = "https://script.google.com/macros/s/AKfycby2sTjKIiBTZnd8cj-i9aPoyQAbdEaPStahCSz2fGqh07vCiY9BaPlJmKlOxEz0SUGAig/exec";
 
-// 🔥 GANTI DENGAN LINK APPS SCRIPT KAMU
-const API_URL = "https://script.google.com/macros/s/AKfycbxBDE-IyHODiaYsDmqu5dvIUWYosZ7We6EjJfS9dX6_DDu5hdSIZwBmO8WnByX3RXO9xg/exec";
+  let semuaData = [];
 
-// ambil data dari Google Sheets
-function loadData() {
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(result => {
-      data = result;
-      tampilkanData();
-    })
-    .catch(err => console.log("Error load:", err));
-}
-
-// tampilkan ke tabel
-function tampilkanData() {
-  let tabel = document.getElementById("tabelData");
-  tabel.innerHTML = "";
-  let total = 0;
-
-  data.forEach(item => {
-    total += parseInt(item.harga);
-
-    tabel.innerHTML += `
-      <tr>
-        <td>${item.nama}</td>
-        <td>${item.produk}</td>
-        <td>${item.harga}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("total").innerText = total;
-}
-
-// kirim data ke Sheets
-function tambahData() {
-  let nama = document.getElementById("nama").value;
-  let produk = document.getElementById("produk").value;
-  let harga = document.getElementById("harga").value;
-
-  if (!nama || !produk || !harga) {
-    alert("Isi semua data!");
-    return;
+  // Format angka ke Rupiah
+  function rupiahFormat(angka) {
+    return "Rp " + parseInt(angka).toLocaleString("id-ID");
   }
 
-  fetch(API_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify({
-      nama: nama,
-      produk: produk,
-      harga: harga
-    })
-  });
+  // Tampilkan status pesan
+  function showStatus(pesan, tipe) {
+    var el = document.getElementById("statusMsg");
+    el.textContent = pesan;
+    el.className = tipe;
+    if (tipe !== "loading") {
+      setTimeout(() => { el.className = ""; el.textContent = ""; }, 3000);
+    }
+  }
 
-  alert("Data terkirim!");
+  // Update kartu statistik
+  function updateStats() {
+    var total = semuaData.reduce((sum, item) => sum + parseInt(item.harga || 0), 0);
+    var rata  = semuaData.length > 0 ? Math.round(total / semuaData.length) : 0;
 
-  // reload data setelah kirim
-  setTimeout(loadData, 1000);
+    document.getElementById("statTransaksi").textContent = semuaData.length;
+    document.getElementById("statTotal").textContent     = rupiahFormat(total);
+    document.getElementById("statRata").textContent      = rupiahFormat(rata);
+  }
 
-  document.getElementById("nama").value = "";
-  document.getElementById("produk").value = "";
-  document.getElementById("harga").value = "";
-}
+  // Tampilkan data ke tabel
+  function tampilkanData() {
+    var tbody = document.getElementById("tabelData");
+    tbody.innerHTML = "";
 
-// load pertama kali
-loadData();
+    if (semuaData.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Belum ada data</td></tr>';
+      return;
+    }
+
+    var total = 0;
+    semuaData.forEach(function(item, idx) {
+      total += parseInt(item.harga || 0);
+      tbody.innerHTML += `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${item.nama}</td>
+          <td>${item.produk}</td>
+          <td class="harga-cell">${rupiahFormat(item.harga)}</td>
+          <td>${item.tanggal}</td>
+          <td>
+            <button class="btn-hapus" onclick="hapusData(${item.baris})">Hapus</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    // Baris total
+    tbody.innerHTML += `
+      <tr class="total-row">
+        <td colspan="3" style="text-align:right">Total</td>
+        <td>${rupiahFormat(total)}</td>
+        <td colspan="2"></td>
+      </tr>
+    `;
+
+    updateStats();
+  }
+
+  // Ambil data dari Google Sheets
+  function loadData() {
+    document.getElementById("btnRefresh").textContent = "Loading...";
+    document.getElementById("btnRefresh").disabled = true;
+
+    fetch(API_URL)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        semuaData = data;
+        tampilkanData();
+      })
+      .catch(function(err) {
+        console.error("Gagal load:", err);
+        document.getElementById("tabelData").innerHTML =
+          '<tr class="empty-row"><td colspan="6">Gagal memuat data. Cek koneksi atau URL API.</td></tr>';
+      })
+      .finally(function() {
+        document.getElementById("btnRefresh").textContent = "Refresh";
+        document.getElementById("btnRefresh").disabled = false;
+      });
+  }
+
+  // Simpan data baru ke Google Sheets
+  function tambahData() {
+    var nama   = document.getElementById("nama").value.trim();
+    var produk = document.getElementById("produk").value.trim();
+    var harga  = document.getElementById("harga").value.trim();
+
+    if (!nama || !produk || !harga) {
+      showStatus("Isi semua kolom terlebih dahulu!", "error");
+      return;
+    }
+
+    if (isNaN(harga) || parseInt(harga) <= 0) {
+      showStatus("Harga harus berupa angka positif!", "error");
+      return;
+    }
+
+    document.getElementById("btnSimpan").disabled = true;
+    showStatus("Menyimpan data...", "loading");
+
+    var url = API_URL
+      + "?action=add"
+      + "&nama="   + encodeURIComponent(nama)
+      + "&produk=" + encodeURIComponent(produk)
+      + "&harga="  + encodeURIComponent(harga);
+
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(result) {
+        if (result.status === "success") {
+          showStatus("Data berhasil disimpan!", "success");
+          document.getElementById("nama").value   = "";
+          document.getElementById("produk").value = "";
+          document.getElementById("harga").value  = "";
+          setTimeout(loadData, 800);
+        } else {
+          showStatus("Gagal: " + result.message, "error");
+        }
+      })
+      .catch(function(err) {
+        console.error("Error simpan:", err);
+        showStatus("Gagal menyimpan. Cek koneksi!", "error");
+      })
+      .finally(function() {
+        document.getElementById("btnSimpan").disabled = false;
+      });
+  }
+
+  // Hapus data dari Google Sheets
+  function hapusData(baris) {
+    if (!confirm("Yakin ingin menghapus data ini?")) return;
+
+    var url = API_URL + "?action=delete&baris=" + baris;
+
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(result) {
+        if (result.status === "success") {
+          showStatus("Data berhasil dihapus!", "success");
+          setTimeout(loadData, 500);
+        } else {
+          showStatus("Gagal hapus: " + result.message, "error");
+        }
+      })
+      .catch(function(err) {
+        console.error("Error hapus:", err);
+        showStatus("Gagal menghapus data!", "error");
+      });
+  }
+
+  // Load data saat halaman dibuka
+  loadData();
 </script>
 
 </body>
